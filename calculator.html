@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Glass Calculator</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background: #e9ecef;
+        display: flex;
+        align-items: center;
+        height: 100vh;
+      }
+      .calc-body {
+        max-width: 350px;
+        background: #212529;
+        border-radius: 20px;
+        padding: 20px;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+      }
+      #display {
+        background: #000;
+        color: #0f0;
+        font-family: monospace;
+        font-size: 2.5rem;
+        text-align: right;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        overflow: hidden;
+      }
+      .btn-calc {
+        height: 60px;
+        font-size: 1.2rem;
+        border-radius: 10px;
+        border: none;
+        transition: 0.2s;
+      }
+      .btn-calc:active {
+        transform: scale(0.95);
+      }
+      .btn-op {
+        background: #fd7e14;
+        color: white;
+      }
+      .btn-num {
+        background: #495057;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container calc-body">
+      <div id="display">0</div>
+      <div class="row g-2">
+        <div class="col-3">
+          <button class="btn btn-danger w-100 btn-calc" onclick="clr()">
+            C
+          </button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-op w-100 btn-calc" onclick="ins('/')">
+            /
+          </button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-op w-100 btn-calc" onclick="ins('*')">
+            ×
+          </button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-secondary w-100 btn-calc" onclick="back()">
+            ←
+          </button>
+        </div>
+
+        <div class="col-3">
+          <button class="btn btn-num w-100 btn-calc" onclick="ins('7')">
+            7
+          </button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-num w-100 btn-calc" onclick="ins('8')">
+            8
+          </button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-num w-100 btn-calc" onclick="ins('9')">
+            9
+          </button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-op w-100 btn-calc" onclick="ins('-')">
+            -
+          </button>
+        </div>
+
+        <div class="col-3">
+          <button class="btn btn-num w-100 btn-calc" onclick="ins('4')">
+            4
+          </button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-num w-100 btn-calc" onclick="ins('5')">
+            5
+          </button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-num w-100 btn-calc" onclick="ins('6')">
+            6
+          </button>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-op w-100 btn-calc" onclick="ins('+')">
+            +
+          </button>
+        </div>
+
+        <div class="col-9">
+          <div class="row g-2">
+            <div class="col-4">
+              <button class="btn btn-num w-100 btn-calc" onclick="ins('1')">
+                1
+              </button>
+            </div>
+            <div class="col-4">
+              <button class="btn btn-num w-100 btn-calc" onclick="ins('2')">
+                2
+              </button>
+            </div>
+            <div class="col-4">
+              <button class="btn btn-num w-100 btn-calc" onclick="ins('3')">
+                3
+              </button>
+            </div>
+            <div class="col-8">
+              <button class="btn btn-num w-100 btn-calc" onclick="ins('0')">
+                0
+              </button>
+            </div>
+            <div class="col-4">
+              <button class="btn btn-num w-100 btn-calc" onclick="ins('.')">
+                .
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="col-3">
+          <button class="btn btn-success w-100 h-100 btn-calc" onclick="eq()">
+            =
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      let d = document.getElementById("display");
+      function ins(v) {
+        d.innerText === "0" ? (d.innerText = v) : (d.innerText += v);
+      }
+      function clr() {
+        d.innerText = "0";
+      }
+      function back() {
+        d.innerText = d.innerText.slice(0, -1) || "0";
+      }
+      function eq() {
+        try {
+          d.innerText = eval(d.innerText);
+        } catch {
+          d.innerText = "Error";
+        }
+      }
+    </script>
+  </body>
+</html>

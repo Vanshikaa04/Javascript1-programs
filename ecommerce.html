@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickShop | JS Store</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root { --primary-color: #4a90e2; }
+        body { background-color: #f4f7f6; font-family: 'Segoe UI', sans-serif; }
+        .product-card { border: none; border-radius: 12px; transition: all 0.3s; }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .product-img { height: 180px; object-fit: cover; border-top-left-radius: 12px; border-top-right-radius: 12px; }
+        .cart-sticky { position: sticky; top: 20px; }
+        #otp-section { display: none; border-left: 4px solid #198754; }
+        .empty-cart-msg { text-align: center; padding: 20px; color: #999; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="#">QuickShop</a>
+        <div class="ms-auto w-50">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search for products (e.g. Phone, Watch)...">
+        </div>
+    </div>
+</nav>
+
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <h4 class="mb-4">Available Products</h4>
+            <div class="row" id="productGrid">
+                </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="cart-sticky">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white py-3">
+                        <h5 class="mb-0">Shopping Cart</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="cartItemsList">
+                            </div>
+
+                        <div class="mt-4 border-top pt-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Subtotal</span>
+                                <span id="displaySubtotal">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2 text-secondary">
+                                <span>GST (4%)</span>
+                                <span id="displayGst">$0.00</span>
+                            </div>
+                            <div class="d-flex justify-content-between fw-bold fs-4 mb-3">
+                                <span>Total</span>
+                                <span id="displayTotal" class="text-success">$0.00</span>
+                            </div>
+
+                            <button id="payBtn" class="btn btn-primary w-100 py-2 fw-bold" onclick="generateOtp()">
+                                Proceed to Pay
+                            </button>
+                        </div>
+
+                        <div id="otp-section" class="mt-4 p-3 bg-light rounded">
+                            <label class="form-label fw-bold">Enter OTP to Verify</label>
+                            <div class="input-group">
+                                <input type="text" id="otpInput" class="form-control" placeholder="4-digit code">
+                                <button class="btn btn-success" onclick="verifyPayment()">Verify</button>
+                            </div>
+                            <div id="otpHint" class="mt-2 small text-primary fw-bold"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 1. Product Database (Objects)
+    const products = [
+        { id: 1, name: "Premium Headphones", price: 120, category: "Electronics", img: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400" },
+        { id: 2, name: "Smart Fitness Watch", price: 85, category: "Electronics", img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400" },
+        { id: 3, name: "Minimalist Camera", price: 450, category: "Electronics", img: "https://play-lh.googleusercontent.com/vxDm4bv7XuXN1WI5Jb1JyTP93FXSN4xeUJ5lwf1h3YjVc2feKx-hRRCBCaW7fzMIvTCp=w600-h300-pc0xffffff-pd" },
+        { id: 4, name: "Travel Backpack", price: 65, category: "Lifestyle", img: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400" },
+        { id: 5, name: "Designer Sunglasses", price: 150, category: "Fashion", img: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400" },
+        { id: 6, name: "Wireless Mouse", price: 25, category: "Electronics", img: "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400" }
+    ];
+
+    let cart = [];
+    let generatedOtp = null;
+    const GST_RATE = 0.04; // 4%
+
+    // 2. Function to Render Product Cards
+    function renderProducts(items) {
+        const grid = document.getElementById('productGrid');
+        grid.innerHTML = ""; 
+
+        if (items.length === 0) {
+            grid.innerHTML = `<div class='col-12 text-center py-5'><h5>No products found.</h5></div>`;
+            return;
+        }
+
+        items.forEach(product => {
+            grid.innerHTML += `
+                <div class="col-md-6 mb-4">
+                    <div class="card product-card shadow-sm h-100">
+                        <img src="${product.img}" class="product-img card-img-top" alt="${product.name}">
+                        <div class="card-body d-flex flex-column">
+                            <span class="badge bg-light text-dark align-self-start mb-2">${product.category}</span>
+                            <h5 class="card-title">${product.name}</h5>
+                            <p class="card-text fw-bold text-primary fs-5">$${product.price}</p>
+                            <button class="btn btn-outline-primary mt-auto" onclick="addToCart(${product.id})">Add to Cart</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    // 3. Search Filter Logic
+    document.getElementById('searchInput').addEventListener('keyup', (e) => {
+        const keyword = e.target.value.toLowerCase();
+        const filtered = products.filter(p => 
+            p.name.toLowerCase().includes(keyword) || 
+            p.category.toLowerCase().includes(keyword)
+        );
+        renderProducts(filtered);
+    });
+
+    // 4. Cart Management Functions
+    function addToCart(id) {
+        const item = products.find(p => p.id === id);
+        cart.push(item);
+        updateCartUI();
+    }
+
+    function removeFromCart(index) {
+        cart.splice(index, 1);
+        updateCartUI();
+    }
+
+    function updateCartUI() {
+        const list = document.getElementById('cartItemsList');
+        if (cart.length === 0) {
+            list.innerHTML = `<div class="empty-cart-msg">Your cart is lonely. Add some items!</div>`;
+            calculateTotals(0);
+            return;
+        }
+
+        let subtotal = 0;
+        list.innerHTML = cart.map((item, index) => {
+            subtotal += item.price;
+            return `
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h6 class="mb-0 small">${item.name}</h6>
+                        <span class="text-muted small">$${item.price}</span>
+                    </div>
+                    <button class="btn btn-sm btn-link text-danger" onclick="removeFromCart(${index})">Remove</button>
+                </div>
+            `;
+        }).join('');
+
+        calculateTotals(subtotal);
+    }
+
+    // 5. Pricing Calculation (Subtotal, GST, Total)
+    function calculateTotals(subtotal) {
+        const gst = subtotal * GST_RATE;
+        const total = subtotal + gst;
+
+        document.getElementById('displaySubtotal').innerText = `$${subtotal.toFixed(2)}`;
+        document.getElementById('displayGst').innerText = `$${gst.toFixed(2)}`;
+        document.getElementById('displayTotal').innerText = `$${total.toFixed(2)}`;
+    }
+
+    // 6. OTP & Payment Workflow
+    function generateOtp() {
+        if (cart.length === 0) {
+            alert("Please add items to your cart first.");
+            return;
+        }
+        
+        // Generate a random 4-digit number
+        generatedOtp = Math.floor(1000 + Math.random() * 9000);
+        
+        document.getElementById('otp-section').style.display = 'block';
+        document.getElementById('otpHint').innerText = `System: Use OTP ${generatedOtp} to confirm payment.`;
+        document.getElementById('payBtn').disabled = true;
+    }
+
+    function verifyPayment() {
+        const userOtp = document.getElementById('otpInput').value;
+        
+        if (userOtp == generatedOtp) {
+            alert("✅ Payment Successful! Your order has been placed.");
+            // Reset everything
+            cart = [];
+            updateCartUI();
+            document.getElementById('otp-section').style.display = 'none';
+            document.getElementById('payBtn').disabled = false;
+            document.getElementById('otpInput').value = "";
+        } else {
+            alert("❌ Incorrect OTP. Please check the code.");
+        }
+    }
+
+    // Initial render
+    renderProducts(products);
+    updateCartUI();
+
+</script>
+
+</body>
+</html>

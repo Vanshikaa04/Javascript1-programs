@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X O Game | Professional Edition</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f0f2f5;
+            --x-color: #ff4757;
+            --o-color: #2e86de;
+        }
+        body { background-color: var(--bg-color); font-family: 'Segoe UI', sans-serif; height: 100vh; display: flex; align-items: center; }
+        .game-container { max-width: 400px; margin: auto; }
+        
+        /* Setup Screen */
+        #setup-screen { display: block; }
+        
+        /* Game Screen */
+        #game-screen { display: none; }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .cell {
+            aspect-ratio: 1/1;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .cell:hover { transform: scale(1.02); background: #fdfdfd; }
+        .cell.taken { cursor: not-allowed; }
+        
+        .player-x { color: var(--x-color); }
+        .player-o { color: var(--o-color); }
+        
+        .status-badge { font-size: 1.1rem; padding: 10px 20px; border-radius: 50px; }
+        .winning-cell { background-color: #d1e7dd !important; animation: pulse 1s infinite; }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="game-container">
+        
+        <div id="setup-screen" class="card shadow p-4 text-center">
+            <h2 class="mb-4">Tic-Tac-Toe</h2>
+            <div class="mb-3 text-start">
+                <label class="form-label fw-bold text-danger">Player X Name</label>
+                <input type="text" id="nameX" class="form-control" placeholder="Enter name">
+            </div>
+            <div class="mb-4 text-start">
+                <label class="form-label fw-bold text-primary">Player O Name</label>
+                <input type="text" id="nameO" class="form-control" placeholder="Enter name">
+            </div>
+            <button class="btn btn-dark w-100 py-2 fs-5" onclick="startGame()">Start Game</button>
+        </div>
+
+        <div id="game-screen">
+            <div class="text-center mb-4">
+                <h3 id="turn-display" class="mb-3"></h3>
+                <div class="d-flex justify-content-between">
+                    <span class="badge bg-danger p-2 px-3" id="labelX">X: --</span>
+                    <span class="badge bg-primary p-2 px-3" id="labelO">O: --</span>
+                </div>
+            </div>
+
+            <div class="grid" id="board">
+                <div class="cell" onclick="makeMove(this, 0)"></div>
+                <div class="cell" onclick="makeMove(this, 1)"></div>
+                <div class="cell" onclick="makeMove(this, 2)"></div>
+                <div class="cell" onclick="makeMove(this, 3)"></div>
+                <div class="cell" onclick="makeMove(this, 4)"></div>
+                <div class="cell" onclick="makeMove(this, 5)"></div>
+                <div class="cell" onclick="makeMove(this, 6)"></div>
+                <div class="cell" onclick="makeMove(this, 7)"></div>
+                <div class="cell" onclick="makeMove(this, 8)"></div>
+            </div>
+
+            <button class="btn btn-outline-secondary w-100 mt-5" onclick="resetGame()">Reset Board</button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    let players = { X: "", O: "" };
+    let currentPlayer = "X";
+    let gameState = ["", "", "", "", "", "", "", "", ""];
+    let gameActive = true;
+
+    const winningConditions = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6]             // Diagonals
+    ];
+
+    function startGame() {
+        const xInput = document.getElementById('nameX').value.trim();
+        const oInput = document.getElementById('nameO').value.trim();
+
+        if (!xInput || !oInput) {
+            alert("Please enter names for both players!");
+            return;
+        }
+
+        players.X = xInput;
+        players.O = oInput;
+
+        document.getElementById('labelX').innerText = `X: ${players.X}`;
+        document.getElementById('labelO').innerText = `O: ${players.O}`;
+        document.getElementById('setup-screen').style.display = 'none';
+        document.getElementById('game-screen').style.display = 'block';
+        
+        updateTurnDisplay();
+    }
+
+    function updateTurnDisplay() {
+        const display = document.getElementById('turn-display');
+        const name = currentPlayer === "X" ? players.X : players.O;
+        display.innerHTML = `It's <span class="player-${currentPlayer.toLowerCase()}">${name}'s</span> turn`;
+    }
+
+    function makeMove(cell, index) {
+        if (gameState[index] !== "" || !gameActive) return;
+
+        gameState[index] = currentPlayer;
+        cell.innerText = currentPlayer;
+        cell.classList.add('taken', `player-${currentPlayer.toLowerCase()}`);
+
+        checkResult();
+    }
+
+    function checkResult() {
+        let roundWon = false;
+        let winCombo = [];
+
+        for (let i = 0; i < winningConditions.length; i++) {
+            const [a, b, c] = winningConditions[i];
+            if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                roundWon = true;
+                winCombo = [a, b, c];
+                break;
+            }
+        }
+
+        if (roundWon) {
+            const winnerName = currentPlayer === "X" ? players.X : players.O;
+            document.getElementById('turn-display').innerHTML = `<span class="text-success fw-bold">🎉 ${winnerName} Wins!</span>`;
+            highlightWinner(winCombo);
+            gameActive = false;
+            return;
+        }
+
+        if (!gameState.includes("")) {
+            document.getElementById('turn-display').innerHTML = `<span class="text-muted fw-bold">🤝 It's a Draw!</span>`;
+            gameActive = false;
+            return;
+        }
+
+        currentPlayer = currentPlayer === "X" ? "O" : "X";
+        updateTurnDisplay();
+    }
+
+    function highlightWinner(indices) {
+        const cells = document.querySelectorAll('.cell');
+        indices.forEach(i => cells[i].classList.add('winning-cell'));
+    }
+
+    function resetGame() {
+        currentPlayer = "X";
+        gameState = ["", "", "", "", "", "", "", "", ""];
+        gameActive = true;
+        document.querySelectorAll('.cell').forEach(cell => {
+            cell.innerText = "";
+            cell.classList.remove('taken', 'player-x', 'player-o', 'winning-cell');
+        });
+        updateTurnDisplay();
+    }
+</script>
+
+</body>
+</html>

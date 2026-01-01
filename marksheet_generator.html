@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Marksheet Gen</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-dark text-white p-5">
+    <div class="container bg-white text-dark p-4 rounded shadow" style="max-width: 600px;">
+        <h3 class="text-center">Student Marksheet</h3>
+        <hr>
+        <div class="row g-3">
+            <div class="col-6"><input id="n" class="form-control" placeholder="Name"></div>
+            <div class="col-6"><input id="r" class="form-control" placeholder="Roll No"></div>
+            <div class="col-4"><input id="s1" type="number" class="form-control" placeholder="Maths"></div>
+            <div class="col-4"><input id="s2" type="number" class="form-control" placeholder="Science"></div>
+            <div class="col-4"><input id="s3" type="number" class="form-control" placeholder="English"></div>
+        </div>
+        <button class="btn btn-dark w-100 mt-3" onclick="gen()">Generate</button>
+        
+        <div id="sheet" class="mt-4 p-3 border d-none">
+            <h4 id="on"></h4>
+            <p id="or"></p>
+            <table class="table">
+                <tr><th>Total</th><td id="ot"></td></tr>
+                <tr><th>Percentage</th><td id="op"></td></tr>
+                <tr><th>Grade</th><td id="og"></td></tr>
+            </table>
+        </div>
+    </div>
+    <script>
+        function gen() {
+            let s1 = +document.getElementById('s1').value, s2 = +document.getElementById('s2').value, s3 = +document.getElementById('s3').value;
+            let total = s1 + s2 + s3, per = (total/3).toFixed(2);
+            let g = per > 80 ? "A+" : per > 60 ? "A" : per > 40 ? "B" : "Fail";
+            document.getElementById('sheet').classList.remove('d-none');
+            document.getElementById('on').innerText = "Name: " + document.getElementById('n').value;
+            document.getElementById('ot').innerText = total + "/300";
+            document.getElementById('op').innerText = per + "%";
+            document.getElementById('og').innerText = g;
+        }
+    </script>
+</body>
+</html>
