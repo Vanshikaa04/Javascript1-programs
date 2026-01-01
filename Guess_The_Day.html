@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>What Day Is It?</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f0f2f5; height: 100vh; display: flex; align-items: center; }
+        .display-day { font-size: 4rem; font-weight: 800; color: #198754; text-transform: uppercase; }
+        .date-input { border: 2px solid #dee2e6; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <div class="card p-5 shadow-lg border-0 mx-auto" style="max-width: 500px;">
+            <h2 class="mb-4">Day Finder</h2>
+            <p class="text-muted">Enter a date to find out the day of the week.</p>
+            
+            <input type="date" id="targetDate" class="form-control form-control-lg date-input mb-4 text-center">
+            
+            <button class="btn btn-dark btn-lg w-100 mb-4" onclick="findDay()">Find Day</button>
+            
+            <div id="dayResult" class="d-none">
+                <p class="mb-0 text-secondary">That day is/was a:</p>
+                <div id="dayName" class="display-day">Monday</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function findDay() {
+            const input = document.getElementById('targetDate').value;
+            if(!input) {
+                alert("Please select a date first!");
+                return;
+            }
+
+            const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+            const d = new Date(input);
+            const dayName = days[d.getDay()];
+
+            document.getElementById('dayName').innerText = dayName;
+            document.getElementById('dayResult').classList.remove('d-none');
+        }
+    </script>
+</body>
+</html>
